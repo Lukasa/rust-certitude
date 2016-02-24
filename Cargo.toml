@@ -1,0 +1,6 @@
+[package]
+name = "certitude"
+version = "0.1.0"
+authors = ["Cory Benfield <lukasaoz@gmail.com>"]
+
+[dependencies]
