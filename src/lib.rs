@@ -17,7 +17,7 @@ pub mod os_x {
     use security_framework::secure_transport::ProtocolSide;
     use security_framework::trust::SecTrust;
 
-    fn validate_cert_chain(encoded_certs: Vec<&[u8]>, hostname: &str) -> bool {
+    pub fn validate_cert_chain(encoded_certs: Vec<&[u8]>, hostname: &str) -> bool {
         let mut certs = Vec::new();
         for encoded_cert in encoded_certs {
             let cert = SecCertificate::from_der(encoded_cert);
@@ -42,7 +42,27 @@ pub mod os_x {
 
 #[cfg(test)]
 mod test {
+    use os_x::validate_cert_chain;
+
+    fn certifi_chain() -> Vec<&'static[u8]> {
+        let leaf = include_bytes!("../fixtures/certifi-leaf.crt");
+        let first_inter = include_bytes!("../fixtures/certifi-first-intermediate.crt");
+        let second_inter = include_bytes!("../fixtures/certifi-second-intermediate.crt");
+
+        vec![leaf, first_inter, second_inter]
+    }
+
     #[test]
-    fn it_works() {
+    fn can_validate_good_chain() {
+        let chain = certifi_chain();
+        let valid = validate_cert_chain(chain, "certifi.io");
+        assert_eq!(valid, true);
+    }
+
+    #[test]
+    fn fails_on_bad_hostname() {
+        let chain = certifi_chain();
+        let valid = validate_cert_chain(chain, "lukasa.co.uk");
+        assert_eq!(valid, false);
     }
 }
