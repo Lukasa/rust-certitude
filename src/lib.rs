@@ -65,4 +65,18 @@ mod test {
         let valid = validate_cert_chain(chain, "lukasa.co.uk");
         assert_eq!(valid, false);
     }
+
+    #[test]
+    fn fails_on_bad_cert() {
+        let mut good_chain = certifi_chain();
+        let originals = good_chain.split_first_mut().unwrap();
+        let leaf = originals.0;
+        let intermediates = originals.1;
+
+        // Deliberately truncate the leaf cert.
+        let mut certs = vec![&leaf[1..50]];
+        certs.extend(intermediates.iter());
+        let valid = validate_cert_chain(certs, "certifi.io");
+        assert_eq!(valid, false);
+    }
 }
