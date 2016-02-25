@@ -4,3 +4,10 @@ version = "0.1.0"
 authors = ["Cory Benfield <lukasaoz@gmail.com>"]
 
 [dependencies]
+libc = "0.2"
+core-foundation = "0.2"
+
+[dependencies.security-framework]
+path = "../rust-security-framework/security-framework"
+[dependencies.security-framework-sys]
+path = "../rust-security-framework/security-framework-sys"
