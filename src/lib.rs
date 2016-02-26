@@ -18,6 +18,7 @@ macro_rules! fail_on_error {
     }
 }
 
+pub mod platform;
 #[cfg(windows)]
 pub mod windows;
 #[cfg(target_os = "macos")]
@@ -25,7 +26,7 @@ pub mod osx;
 
 #[cfg(test)]
 mod test {
-    use os_x::validate_cert_chain;
+    use platform::validate_cert_chain;
 
     fn certifi_chain() -> Vec<&'static[u8]> {
         let leaf = include_bytes!("../fixtures/certifi-leaf.crt");
