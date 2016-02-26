@@ -1,6 +1,13 @@
 extern crate libc;
+
+#[cfg(macos)]
 extern crate core_foundation;
+#[cfg(macos)]
 extern crate security_framework;
+#[cfg(windows)]
+extern crate crypt32;
+#[cfg(windows)]
+extern crate winapi;
 
 macro_rules! fail_on_error {
     ($e:expr) => {
@@ -11,6 +18,10 @@ macro_rules! fail_on_error {
     }
 }
 
+#[cfg(windows)]
+pub mod windows;
+
+#[cfg(macos)]
 pub mod os_x {
     use security_framework::certificate::SecCertificate;
     use security_framework::policy::SecPolicy;
@@ -40,6 +51,7 @@ pub mod os_x {
     }
 }
 
+#[cfg(macos)]
 #[cfg(test)]
 mod test {
     use os_x::validate_cert_chain;

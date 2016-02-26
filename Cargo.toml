@@ -5,9 +5,15 @@ authors = ["Cory Benfield <lukasaoz@gmail.com>"]
 
 [dependencies]
 libc = "0.2"
-core-foundation = "0.2"
 
-[dependencies.security-framework]
-path = "../rust-security-framework/security-framework"
-[dependencies.security-framework-sys]
-path = "../rust-security-framework/security-framework-sys"
+[target.x86_64-pc-windows-gnu.dependencies]
+crypt32-sys = "0.2"
+winapi = "0.2"
+
+[target.x86_64-pc-windows-msvc.dependencies]
+crypt32-sys = "0.2"
+winapi = "0.2"
+
+[target.x86_64-apple-darwin.dependencies]
+core-foundation = "0.2"
+security-framework = "0.1.2"
