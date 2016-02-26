@@ -13,7 +13,7 @@ The Rust API currently looks like this:
 ```rust
 extern crate certitude;
 
-use certitude::os_x::validate_cert_chain;
+use certitude::platform::validate_cert_chain;
 
 fn example() {
     // Assume certs is a Vector of DER-encoded certificates.
@@ -27,7 +27,7 @@ fn example() {
 }
 ```
 
-In the future, the OS X and Windows implementations should be transparently switched in and out, such that a user of this library can transparently use a single API and have the appropriate platform-specific logic used directly, without their intervention.
+The OS X and Windows implementations are transparently switched in and out, such that a user of this library can use a single API and have the appropriate platform-specific logic used directly, without their intervention. This of course requires building against the correct target, but as long as the target is correctly specified the correct version of the code will be used.
 
 ## Work In Progress
 
