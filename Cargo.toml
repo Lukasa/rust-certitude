@@ -16,4 +16,4 @@ winapi = "0.2"
 
 [target.x86_64-apple-darwin.dependencies]
 core-foundation = "0.2"
-security-framework = "0.1.2"
+security-framework = "0.1.3"
