@@ -1,8 +1,8 @@
 extern crate libc;
 
-#[cfg(macos)]
+#[cfg(target_os = "macos")]
 extern crate core_foundation;
-#[cfg(macos)]
+#[cfg(target_os = "macos")]
 extern crate security_framework;
 #[cfg(windows)]
 extern crate crypt32;
@@ -23,7 +23,6 @@ pub mod windows;
 #[cfg(macos)]
 pub mod os_x;
 
-#[cfg(macos)]
 #[cfg(test)]
 mod test {
     use os_x::validate_cert_chain;
