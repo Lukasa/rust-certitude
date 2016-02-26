@@ -31,4 +31,4 @@ In the future, the OS X and Windows implementations should be transparently swit
 
 ## Work In Progress
 
-This is currently a very early beta, and I'm mostly investigating the feasibility of the approach. Currently the library only "supports" OS X as a valid certificate verification platform. The next target will be Windows: following that, I will investigate the feasibility of hooking into OpenSSL, though that's considered a strictly less important problem than sorting this out on Windows and OS X.
+This is currently a very early beta, and I'm mostly investigating the feasibility of the approach. Currently the library supports OS X and Windows as a valid certificate verification platform. I will investigate the feasibility of hooking into OpenSSL, though that's considered a strictly less important problem than sorting this out on Windows and OS X, as people using OpenSSL for their TLS will already have access to OpenSSL's native validation logic.
