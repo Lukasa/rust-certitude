@@ -20,8 +20,8 @@ macro_rules! fail_on_error {
 
 #[cfg(windows)]
 pub mod windows;
-#[cfg(macos)]
-pub mod os_x;
+#[cfg(target_os = "macos")]
+pub mod osx;
 
 #[cfg(test)]
 mod test {
