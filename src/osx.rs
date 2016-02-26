@@ -27,7 +27,7 @@ pub fn validate_cert_chain(encoded_certs: Vec<&[u8]>, hostname: &str) -> bool {
 
 #[cfg(test)]
 mod test {
-    use os_x::validate_cert_chain;
+    use osx::validate_cert_chain;
 
     fn certifi_chain() -> Vec<&'static[u8]> {
         let leaf = include_bytes!("../fixtures/certifi-leaf.crt");
