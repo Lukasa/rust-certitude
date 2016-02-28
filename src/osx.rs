@@ -30,9 +30,9 @@ mod test {
     use osx::validate_cert_chain;
 
     fn certifi_chain() -> Vec<&'static[u8]> {
-        let leaf = include_bytes!("../fixtures/certifi-leaf.crt");
-        let first_inter = include_bytes!("../fixtures/certifi-first-intermediate.crt");
-        let second_inter = include_bytes!("../fixtures/certifi-second-intermediate.crt");
+        let leaf = include_bytes!("../fixtures/certifi/leaf.crt");
+        let first_inter = include_bytes!("../fixtures/certifi/first-intermediate.crt");
+        let second_inter = include_bytes!("../fixtures/certifi/second-intermediate.crt");
 
         vec![leaf, first_inter, second_inter]
     }
