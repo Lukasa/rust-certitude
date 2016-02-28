@@ -1,3 +1,4 @@
+REM For the license on this file, please see NOTICES
 echo on
 SetLocal EnableDelayedExpansion
 
