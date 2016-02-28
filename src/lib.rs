@@ -28,7 +28,7 @@ pub mod osx;
 mod test {
     use platform::validate_cert_chain;
 
-    fn certifi_chain() -> Vec<&'static[u8]> {
+    pub fn certifi_chain() -> Vec<&'static[u8]> {
         let leaf = include_bytes!("../fixtures/certifi/leaf.crt");
         let first_inter = include_bytes!("../fixtures/certifi/first-intermediate.crt");
         let second_inter = include_bytes!("../fixtures/certifi/second-intermediate.crt");

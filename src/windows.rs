@@ -231,14 +231,7 @@ fn build_cert_context(encoded_certs: Vec<&[u8]>) -> Result<CertContext, &'static
 #[cfg(test)]
 mod test {
     use windows::validate_cert_chain;
-
-    fn certifi_chain() -> Vec<&'static[u8]> {
-        let leaf = include_bytes!("../fixtures/certifi/leaf.crt");
-        let first_inter = include_bytes!("../fixtures/certifi/first-intermediate.crt");
-        let second_inter = include_bytes!("../fixtures/certifi/second-intermediate.crt");
-
-        vec![leaf, first_inter, second_inter]
-    }
+    use test::{expired_chain, certifi_chain};
 
     #[test]
     fn can_validate_good_chain() {
@@ -265,6 +258,13 @@ mod test {
         let mut certs = vec![&leaf[1..50]];
         certs.extend(intermediates.iter());
         let valid = validate_cert_chain(certs, "certifi.io");
+        assert_eq!(valid, false);
+    }
+
+    #[test]
+    fn fails_on_expired_cert() {
+        let chain = expired_chain();
+        let valid = validate_cert_chain(chain, "expired.badssl.com");
         assert_eq!(valid, false);
     }
 }

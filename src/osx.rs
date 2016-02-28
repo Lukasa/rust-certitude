@@ -28,15 +28,7 @@ pub fn validate_cert_chain(encoded_certs: Vec<&[u8]>, hostname: &str) -> bool {
 #[cfg(test)]
 mod test {
     use osx::validate_cert_chain;
-    use test::expired_chain;
-
-    fn certifi_chain() -> Vec<&'static[u8]> {
-        let leaf = include_bytes!("../fixtures/certifi/leaf.crt");
-        let first_inter = include_bytes!("../fixtures/certifi/first-intermediate.crt");
-        let second_inter = include_bytes!("../fixtures/certifi/second-intermediate.crt");
-
-        vec![leaf, first_inter, second_inter]
-    }
+    use test::{expired_chain, certifi_chain};
 
     #[test]
     fn can_validate_good_chain() {
