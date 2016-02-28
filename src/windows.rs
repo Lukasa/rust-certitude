@@ -10,7 +10,7 @@ use winapi::minwindef::DWORD;
 use winapi::wincrypt::{PCCERT_CHAIN_CONTEXT, CERT_STORE_PROV_MEMORY, HCERTSTORE, CERT_STORE_DEFER_CLOSE_UNTIL_LAST_FREE_FLAG, PCCERT_CONTEXT, X509_ASN_ENCODING, CERT_STORE_ADD_ALWAYS, CERT_CHAIN_PARA, CERT_CHAIN_POLICY_PARA, CERT_CHAIN_POLICY_STATUS, CERT_CHAIN_POLICY_SSL, szOID_PKIX_KP_SERVER_AUTH, szOID_SERVER_GATED_CRYPTO, szOID_SGC_NETSCAPE};
 use winapi::winnt::LPWSTR;
 
-pub fn validate_cert_chain(encoded_certs: Vec<&[u8]>, hostname: &str) -> bool {
+pub fn validate_cert_chain(encoded_certs: &[&[u8]], hostname: &str) -> bool {
     let context = fail_on_error!(build_cert_context(encoded_certs));
     let chain = fail_on_error!(build_chain(context));
     verify_chain_against_policy(chain, hostname)
@@ -236,14 +236,14 @@ mod test {
     #[test]
     fn can_validate_good_chain() {
         let chain = certifi_chain();
-        let valid = validate_cert_chain(chain, "certifi.io");
+        let valid = validate_cert_chain(&chain, "certifi.io");
         assert_eq!(valid, true);
     }
 
     #[test]
     fn fails_on_bad_hostname() {
         let chain = certifi_chain();
-        let valid = validate_cert_chain(chain, "lukasa.co.uk");
+        let valid = validate_cert_chain(&chain, "lukasa.co.uk");
         assert_eq!(valid, false);
     }
 
@@ -257,21 +257,21 @@ mod test {
         // Deliberately truncate the leaf cert.
         let mut certs = vec![&leaf[1..50]];
         certs.extend(intermediates.iter());
-        let valid = validate_cert_chain(certs, "certifi.io");
+        let valid = validate_cert_chain(&certs, "certifi.io");
         assert_eq!(valid, false);
     }
 
     #[test]
     fn fails_on_expired_cert() {
         let chain = expired_chain();
-        let valid = validate_cert_chain(chain, "expired.badssl.com");
+        let valid = validate_cert_chain(&chain, "expired.badssl.com");
         assert_eq!(valid, false);
     }
 
     #[test]
     fn test_fails_on_self_signed() {
         let chain = self_signed_chain();
-        let valid = validate_cert_chain(chain, "self-signed.badssl.com");
+        let valid = validate_cert_chain(&chain, "self-signed.badssl.com");
         assert_eq!(valid, false);
     }
 }

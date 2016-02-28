@@ -5,6 +5,6 @@ use osx::validate_cert_chain as backend;
 use windows::validate_cert_chain as backend;
 
 /// Validate a chain of certificates.
-pub fn validate_cert_chain(encoded_certs: Vec<&[u8]>, hostname: &str) -> bool {
+pub fn validate_cert_chain(encoded_certs: &[&[u8]], hostname: &str) -> bool {
     backend(encoded_certs, hostname)
 }
