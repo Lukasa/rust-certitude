@@ -44,6 +44,12 @@ mod test {
         vec![leaf, first_inter, second_inter]
     }
 
+    pub fn self_signed_chain() -> Vec<&'static[u8]> {
+        let leaf = include_bytes!("../fixtures/self-signed/leaf.crt");
+
+        vec![leaf]
+    }
+
     #[test]
     fn can_validate_good_chain() {
         let chain = certifi_chain();
@@ -76,6 +82,13 @@ mod test {
     fn fails_on_expired_cert() {
         let chain = expired_chain();
         let valid = validate_cert_chain(chain, "expired.badssl.com");
+        assert_eq!(valid, false);
+    }
+
+    #[test]
+    fn test_fails_on_self_signed() {
+        let chain = self_signed_chain();
+        let valid = validate_cert_chain(chain, "self-signed.badssl.com");
         assert_eq!(valid, false);
     }
 }

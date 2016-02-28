@@ -231,7 +231,7 @@ fn build_cert_context(encoded_certs: Vec<&[u8]>) -> Result<CertContext, &'static
 #[cfg(test)]
 mod test {
     use windows::validate_cert_chain;
-    use test::{expired_chain, certifi_chain};
+    use test::{expired_chain, certifi_chain, self_signed_chain};
 
     #[test]
     fn can_validate_good_chain() {
@@ -265,6 +265,13 @@ mod test {
     fn fails_on_expired_cert() {
         let chain = expired_chain();
         let valid = validate_cert_chain(chain, "expired.badssl.com");
+        assert_eq!(valid, false);
+    }
+
+    #[test]
+    fn test_fails_on_self_signed() {
+        let chain = self_signed_chain();
+        let valid = validate_cert_chain(chain, "self-signed.badssl.com");
         assert_eq!(valid, false);
     }
 }
