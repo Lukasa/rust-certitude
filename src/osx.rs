@@ -28,14 +28,7 @@ pub fn validate_cert_chain(encoded_certs: Vec<&[u8]>, hostname: &str) -> bool {
 #[cfg(test)]
 mod test {
     use osx::validate_cert_chain;
-
-    fn certifi_chain() -> Vec<&'static[u8]> {
-        let leaf = include_bytes!("../fixtures/certifi-leaf.crt");
-        let first_inter = include_bytes!("../fixtures/certifi-first-intermediate.crt");
-        let second_inter = include_bytes!("../fixtures/certifi-second-intermediate.crt");
-
-        vec![leaf, first_inter, second_inter]
-    }
+    use test::{expired_chain, certifi_chain, self_signed_chain};
 
     #[test]
     fn can_validate_good_chain() {
@@ -62,6 +55,20 @@ mod test {
         let mut certs = vec![&leaf[1..50]];
         certs.extend(intermediates.iter());
         let valid = validate_cert_chain(certs, "certifi.io");
+        assert_eq!(valid, false);
+    }
+
+    #[test]
+    fn fails_on_expired_cert() {
+        let chain = expired_chain();
+        let valid = validate_cert_chain(chain, "expired.badssl.com");
+        assert_eq!(valid, false);
+    }
+
+    #[test]
+    fn test_fails_on_self_signed() {
+        let chain = self_signed_chain();
+        let valid = validate_cert_chain(chain, "self-signed.badssl.com");
         assert_eq!(valid, false);
     }
 }
