@@ -36,6 +36,14 @@ mod test {
         vec![leaf, first_inter, second_inter]
     }
 
+    pub fn expired_chain() -> Vec<&'static[u8]> {
+        let leaf = include_bytes!("../fixtures/expired/leaf.crt");
+        let first_inter = include_bytes!("../fixtures/expired/first-intermediate.crt");
+        let second_inter = include_bytes!("../fixtures/expired/second-intermediate.crt");
+
+        vec![leaf, first_inter, second_inter]
+    }
+
     #[test]
     fn can_validate_good_chain() {
         let chain = certifi_chain();
@@ -61,6 +69,13 @@ mod test {
         let mut certs = vec![&leaf[1..50]];
         certs.extend(intermediates.iter());
         let valid = validate_cert_chain(certs, "certifi.io");
+        assert_eq!(valid, false);
+    }
+
+    #[test]
+    fn fails_on_expired_cert() {
+        let chain = expired_chain();
+        let valid = validate_cert_chain(chain, "expired.badssl.com");
         assert_eq!(valid, false);
     }
 }
