@@ -20,8 +20,14 @@ use winapi::winnt::LPWSTR;
 use ValidationResult;
 
 pub fn validate_cert_chain(encoded_certs: &[&[u8]], hostname: &str) -> ValidationResult {
-    let context = try!(build_cert_context(encoded_certs));
-    let chain = try!(build_chain(context));
+    let context = match build_cert_context(encoded_certs) {
+        Ok(context) => context,
+        Err(e) => return e,
+    };
+    let chain = match build_chain(context) {
+        Ok(chain) => chain,
+        Err(e) => return e,
+    };
     verify_chain_against_policy(chain, hostname)
 }
 
