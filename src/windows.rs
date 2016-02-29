@@ -5,9 +5,16 @@ use std::ffi::OsStr;
 use std::os::raw::{c_void, c_char};
 use std::os::windows::ffi::OsStrExt;
 
-use crypt32::{CertOpenStore, CertCloseStore, CertAddEncodedCertificateToStore, CertFreeCertificateContext, CertGetCertificateChain, CertFreeCertificateChain, CertVerifyCertificateChainPolicy};
+use crypt32::{CertOpenStore, CertCloseStore, CertAddEncodedCertificateToStore,
+              CertFreeCertificateContext, CertGetCertificateChain,
+              CertFreeCertificateChain, CertVerifyCertificateChainPolicy};
 use winapi::minwindef::DWORD;
-use winapi::wincrypt::{PCCERT_CHAIN_CONTEXT, CERT_STORE_PROV_MEMORY, HCERTSTORE, CERT_STORE_DEFER_CLOSE_UNTIL_LAST_FREE_FLAG, PCCERT_CONTEXT, X509_ASN_ENCODING, CERT_STORE_ADD_ALWAYS, CERT_CHAIN_PARA, CERT_CHAIN_POLICY_PARA, CERT_CHAIN_POLICY_STATUS, CERT_CHAIN_POLICY_SSL, szOID_PKIX_KP_SERVER_AUTH, szOID_SERVER_GATED_CRYPTO, szOID_SGC_NETSCAPE};
+use winapi::wincrypt::{PCCERT_CHAIN_CONTEXT, CERT_STORE_PROV_MEMORY, HCERTSTORE,
+                       CERT_STORE_DEFER_CLOSE_UNTIL_LAST_FREE_FLAG, PCCERT_CONTEXT,
+                       X509_ASN_ENCODING, CERT_STORE_ADD_ALWAYS, CERT_CHAIN_PARA,
+                       CERT_CHAIN_POLICY_PARA, CERT_CHAIN_POLICY_STATUS,
+                       CERT_CHAIN_POLICY_SSL, szOID_PKIX_KP_SERVER_AUTH,
+                       szOID_SERVER_GATED_CRYPTO, szOID_SGC_NETSCAPE};
 use winapi::winnt::LPWSTR;
 
 pub fn validate_cert_chain(encoded_certs: Vec<&[u8]>, hostname: &str) -> bool {
