@@ -172,7 +172,7 @@ fn build_chain(cert_context: CertContext) -> Result<CertChainContext, &'static s
 
 
 // Builds the certificate chain provided into a certificate store.
-fn build_cert_context(encoded_certs: Vec<&[u8]>) -> Result<CertContext, &'static str> {
+fn build_cert_context(encoded_certs: &[&[u8]]) -> Result<CertContext, &'static str> {
     // Build a backing store, in-memory.
     let store_ptr = unsafe {
         let backing_store = CertOpenStore(
