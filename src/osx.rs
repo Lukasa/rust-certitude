@@ -1,3 +1,4 @@
+use core_foundation::base::OSStatus;
 use security_framework::certificate::SecCertificate;
 use security_framework::policy::SecPolicy;
 use security_framework::secure_transport::ProtocolSide;
@@ -19,17 +20,17 @@ pub fn validate_cert_chain(encoded_certs: &[&[u8]], hostname: &str) -> Validatio
 
     let ssl_policy = match SecPolicy::for_ssl(ProtocolSide::Client, hostname) {
         Ok(policy) => policy,
-        Err(_) => return ValidationResult::MalformedHostname,
+        Err(_) => return ValidationResult::ErrorDuringValidation,
     };
     let trust = match SecTrust::create_with_certificates(&certs[..], &[ssl_policy]) {
         Ok(trust) => trust,
-        Err(_) => return ValidationResult::UnableToBuildTrustStore,
+        Err(status) => return os_status_to_validation_result(status.code())
     };
 
     // Errors here are really unexpected.
     match trust.evaluate() {
         Ok(result) => trust_result_to_validation_result(result),
-        Err(_) => ValidationResult::ErrorDuringValidation,
+        Err(status) => os_status_to_validation_result(status.code()),
     }
 }
 
@@ -41,6 +42,24 @@ fn trust_result_to_validation_result(trust_result: TrustResult) -> ValidationRes
         _ => ValidationResult::NotTrusted,
     }
 }
+
+
+// Convert OSStatus codes to validation results. Used to handle errors.
+fn os_status_to_validation_result(status: OSStatus) -> ValidationResult {
+    match status {
+        errSecNotAvailable | errSecNoSecurityModule | errSecNoPolicyModule =>
+            ValidationResult::MissingFunctionality,
+        errSecAuthFailed => ValidationResult::UserAuthenticationRequired,
+        _ => ValidationResult::ErrorDuringValidation,
+    }
+}
+
+
+// Define some error constants, because rust-security-framework doesn't.
+const errSecNotAvailable: OSStatus = -25291;
+const errSecNoSecurityModule: OSStatus = -25313;
+const errSecNoPolicyModule: OSStatus = -25314;
+const errSecAuthFailed: OSStatus = -25293;
 
 
 #[cfg(test)]

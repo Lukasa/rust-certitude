@@ -17,9 +17,10 @@ pub enum ValidationResult {
     Trusted = 1,
     NotTrusted,
     MalformedCertificateInChain,
-    MalformedHostname,
     UnableToBuildTrustStore,
     ErrorDuringValidation,
+    MissingFunctionality,
+    UserAuthenticationRequired,
 }
 
 
