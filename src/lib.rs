@@ -1,3 +1,6 @@
+// Functions for validating certificates on many platforms.
+#![deny(warnings)]
+
 extern crate libc;
 
 #[cfg(target_os = "macos")]

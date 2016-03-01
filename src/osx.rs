@@ -45,6 +45,7 @@ fn trust_result_to_validation_result(trust_result: TrustResult) -> ValidationRes
 
 
 // Convert OSStatus codes to validation results. Used to handle errors.
+#[allow(non_upper_case_globals)]
 fn os_status_to_validation_result(status: OSStatus) -> ValidationResult {
     match status {
         errSecNotAvailable | errSecNoSecurityModule | errSecNoPolicyModule =>
@@ -56,9 +57,13 @@ fn os_status_to_validation_result(status: OSStatus) -> ValidationResult {
 
 
 // Define some error constants, because rust-security-framework doesn't.
+#[allow(non_upper_case_globals)]
 const errSecNotAvailable: OSStatus = -25291;
+#[allow(non_upper_case_globals)]
 const errSecNoSecurityModule: OSStatus = -25313;
+#[allow(non_upper_case_globals)]
 const errSecNoPolicyModule: OSStatus = -25314;
+#[allow(non_upper_case_globals)]
 const errSecAuthFailed: OSStatus = -25293;
 
 
