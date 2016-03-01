@@ -17,9 +17,17 @@ use winapi::wincrypt::{PCCERT_CHAIN_CONTEXT, CERT_STORE_PROV_MEMORY, HCERTSTORE,
                        szOID_SERVER_GATED_CRYPTO, szOID_SGC_NETSCAPE};
 use winapi::winnt::LPWSTR;
 
-pub fn validate_cert_chain(encoded_certs: &[&[u8]], hostname: &str) -> bool {
-    let context = fail_on_error!(build_cert_context(encoded_certs));
-    let chain = fail_on_error!(build_chain(context));
+use ValidationResult;
+
+pub fn validate_cert_chain(encoded_certs: &[&[u8]], hostname: &str) -> ValidationResult {
+    let context = match build_cert_context(encoded_certs) {
+        Ok(context) => context,
+        Err(e) => return e,
+    };
+    let chain = match build_chain(context) {
+        Ok(chain) => chain,
+        Err(e) => return e,
+    };
     verify_chain_against_policy(chain, hostname)
 }
 
@@ -82,7 +90,7 @@ impl Drop for CertChainContext {
 
 
 // Verify that a given certificate chain meets the security policy.
-fn verify_chain_against_policy(chain_context: CertChainContext, hostname: &str) -> bool {
+fn verify_chain_against_policy(chain_context: CertChainContext, hostname: &str) -> ValidationResult {
     // To begin, we need to create the policy. The policy is simple: suitable for
     // SSL, suitable for this host. First, we need the hostname as a null-terminated array of wchar_t.
     // This bizarre one-liner does that.
@@ -120,18 +128,21 @@ fn verify_chain_against_policy(chain_context: CertChainContext, hostname: &str) 
         );
 
         if verified == 0 {
-            return false;
+            return ValidationResult::ErrorDuringValidation;
         }
     }
     // This is probably overbroad: look at the errors in https://msdn.microsoft.com/en-us/library/windows/desktop/aa377188(v=vs.85).aspx
     // and re-evaluate.
-    result.dwError == 0
+    match result.dwError {
+        0 => ValidationResult::Trusted,
+        _ => ValidationResult::NotTrusted,
+    }
 }
 
 
 // Builds a certificate chain context. This tells Windows to build a chain, but
 // doesn't validate that it's acceptable for the host in question.
-fn build_chain(cert_context: CertContext) -> Result<CertChainContext, &'static str> {
+fn build_chain(cert_context: CertContext) -> Result<CertChainContext, ValidationResult> {
     // Define acceptable certificate uses. In this case, we would like to just use SERVER_AUTH, but
     // Chrome uses SERVER_GATED_CRYPTO and SGC_NETSCAPE because...well, who knows, but let's do that
     // anyway.
@@ -167,10 +178,10 @@ fn build_chain(cert_context: CertContext) -> Result<CertChainContext, &'static s
             &mut chain_context_ptr
         );
         if got_chain == 0 {
-            return Err("Unable to build certificate chain");
+            return Err(ValidationResult::NotTrusted);
         }
         if chain_context_ptr.is_null() {
-            return Err("Unable to build certificate chain");
+            return Err(ValidationResult::ErrorDuringValidation);
         }
     }
     let context = CertChainContext(chain_context_ptr as PCCERT_CHAIN_CONTEXT);
@@ -179,7 +190,7 @@ fn build_chain(cert_context: CertContext) -> Result<CertChainContext, &'static s
 
 
 // Builds the certificate chain provided into a certificate store.
-fn build_cert_context(encoded_certs: &[&[u8]]) -> Result<CertContext, &'static str> {
+fn build_cert_context(encoded_certs: &[&[u8]]) -> Result<CertContext, ValidationResult> {
     // Build a backing store, in-memory.
     let store_ptr = unsafe {
         let backing_store = CertOpenStore(
@@ -190,7 +201,7 @@ fn build_cert_context(encoded_certs: &[&[u8]]) -> Result<CertContext, &'static s
             ptr::null(),
         );
         if backing_store.is_null() {
-            return Err("Unable to open in memory store.")
+            return Err(ValidationResult::ErrorDuringValidation);
         }
         backing_store
     };
@@ -209,7 +220,7 @@ fn build_cert_context(encoded_certs: &[&[u8]]) -> Result<CertContext, &'static s
             &mut primary_cert_ptr,
         );
         if ok == 0 {
-            return Err("Unable to parse leaf certificate");
+            return Err(ValidationResult::MalformedCertificateInChain);
         }
     }
     let primary_cert = CertContext(primary_cert_ptr);
@@ -227,7 +238,7 @@ fn build_cert_context(encoded_certs: &[&[u8]]) -> Result<CertContext, &'static s
                 ptr::null_mut(),
             );
             if ok == 0 {
-                return Err("Unable to parse intermediate certificate");
+                return Err(ValidationResult::MalformedCertificateInChain);
             }
         }
     }
@@ -239,19 +250,20 @@ fn build_cert_context(encoded_certs: &[&[u8]]) -> Result<CertContext, &'static s
 mod test {
     use windows::validate_cert_chain;
     use test::{expired_chain, certifi_chain, self_signed_chain};
+    use ValidationResult;
 
     #[test]
     fn can_validate_good_chain() {
         let chain = certifi_chain();
         let valid = validate_cert_chain(&chain, "certifi.io");
-        assert_eq!(valid, true);
+        assert_eq!(valid, ValidationResult::Trusted);
     }
 
     #[test]
     fn fails_on_bad_hostname() {
         let chain = certifi_chain();
         let valid = validate_cert_chain(&chain, "lukasa.co.uk");
-        assert_eq!(valid, false);
+        assert_eq!(valid, ValidationResult::NotTrusted);
     }
 
     #[test]
@@ -265,20 +277,20 @@ mod test {
         let mut certs = vec![&leaf[1..50]];
         certs.extend(intermediates.iter());
         let valid = validate_cert_chain(&certs, "certifi.io");
-        assert_eq!(valid, false);
+        assert_eq!(valid, ValidationResult::MalformedCertificateInChain);
     }
 
     #[test]
     fn fails_on_expired_cert() {
         let chain = expired_chain();
         let valid = validate_cert_chain(&chain, "expired.badssl.com");
-        assert_eq!(valid, false);
+        assert_eq!(valid, ValidationResult::NotTrusted);
     }
 
     #[test]
     fn test_fails_on_self_signed() {
         let chain = self_signed_chain();
         let valid = validate_cert_chain(&chain, "self-signed.badssl.com");
-        assert_eq!(valid, false);
+        assert_eq!(valid, ValidationResult::NotTrusted);
     }
 }

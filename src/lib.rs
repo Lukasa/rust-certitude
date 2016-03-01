@@ -9,14 +9,20 @@ extern crate crypt32;
 #[cfg(windows)]
 extern crate winapi;
 
-macro_rules! fail_on_error {
-    ($e:expr) => {
-        match $e {
-            Ok(s) => s,
-            Err(_) => return false,
-        }
-    }
+
+
+// TODO: Widen "NotTrusted".
+#[derive(PartialEq, Debug)]
+pub enum ValidationResult {
+    Trusted = 1,
+    NotTrusted,
+    MalformedCertificateInChain,
+    UnableToBuildTrustStore,
+    ErrorDuringValidation,
+    MissingFunctionality,
+    UserAuthenticationRequired,
 }
+
 
 pub mod platform;
 #[cfg(windows)]
@@ -27,6 +33,7 @@ pub mod osx;
 #[cfg(test)]
 mod test {
     use platform::validate_cert_chain;
+    use ValidationResult;
 
     pub fn certifi_chain() -> Vec<&'static[u8]> {
         let leaf = include_bytes!("../fixtures/certifi/leaf.crt");
@@ -54,14 +61,14 @@ mod test {
     fn can_validate_good_chain() {
         let chain = certifi_chain();
         let valid = validate_cert_chain(&chain, "certifi.io");
-        assert_eq!(valid, true);
+        assert_eq!(valid, ValidationResult::Trusted);
     }
 
     #[test]
     fn fails_on_bad_hostname() {
         let chain = certifi_chain();
         let valid = validate_cert_chain(&chain, "lukasa.co.uk");
-        assert_eq!(valid, false);
+        assert_eq!(valid, ValidationResult::NotTrusted);
     }
 
     #[test]
@@ -75,20 +82,25 @@ mod test {
         let mut certs = vec![&leaf[1..50]];
         certs.extend(intermediates.iter());
         let valid = validate_cert_chain(&certs, "certifi.io");
-        assert_eq!(valid, false);
+        if cfg!(target_os = "macos") {
+            assert_eq!(valid, ValidationResult::NotTrusted);
+        } else {
+            // Windows
+            assert_eq!(valid, ValidationResult::MalformedCertificateInChain);
+        }
     }
 
     #[test]
     fn fails_on_expired_cert() {
         let chain = expired_chain();
         let valid = validate_cert_chain(&chain, "expired.badssl.com");
-        assert_eq!(valid, false);
+        assert_eq!(valid, ValidationResult::NotTrusted);
     }
 
     #[test]
     fn test_fails_on_self_signed() {
         let chain = self_signed_chain();
         let valid = validate_cert_chain(&chain, "self-signed.badssl.com");
-        assert_eq!(valid, false);
+        assert_eq!(valid, ValidationResult::NotTrusted);
     }
 }
