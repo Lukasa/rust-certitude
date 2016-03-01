@@ -45,6 +45,7 @@ macro_rules! as_cchar_vec {
 
 // Sadly, winapi-rs doesn't yet have a structure we need, so I'll need to build it here.
 #[repr(C)]
+#[allow(non_snake_case)]
 struct SSL_EXTRA_CERT_CHAIN_POLICY_PARA {
     cbSize: DWORD,
     dwAuthType: DWORD,
