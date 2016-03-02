@@ -19,6 +19,7 @@ if [[ "${RELEASE}" = true ]]; then
     CARGO_FLAGS="--release"
     OPTIMIZATION="-O1"
     TARGET="release"
+fi
 
 cd ../c-certitude
 cargo build --verbose "${CARGO_FLAGS}"
