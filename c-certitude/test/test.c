@@ -33,7 +33,7 @@ int main(int argc, char **argv) {
 
         assert(cert_data != NULL);
 
-        file = fopen(filenames[i], "r");
+        file = fopen(filenames[i], "rb");
         if (file == NULL) {
             fprintf(stderr, "Cannot open file %d!\n", i);
             exit(1);
