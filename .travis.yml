@@ -2,17 +2,22 @@ language: rust
 
 # We expressly write out the build matrix here because we need to set the
 # appropriate target for each platform. Happily, because there's no Linux
-# support ye  t, this is pretty easy!
+# support yet, this is pretty easy!
+rust:
+  - stable
+  - beta
+  - nightly
+
+env:
+  - TARGET_X=x86_64-apple-darwin RELEASE=false
+  - TARGET_X=x86_64-apple-darwin RELEASE=true
+
+os:
+  - osx
+
 matrix:
   allow_failures:
     - rust: nightly
-  include:
-    - env: TARGET_X=x86_64-apple-darwin
-      rust: stable
-      os: osx
-    - env: TARGET_X=x86_64-apple-darwin
-      rust: beta
-      os: osx
-    - env: TARGET_X=x86_64-apple-darwin
-      rust: nightly
-      os: osx
+
+script:
+  - "travis/test.sh"
