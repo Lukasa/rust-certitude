@@ -29,7 +29,13 @@ if %ERRORLEVEL% NEQ 0 exit 1
 
 set PATH="%TARGET_PROGRAM_FILES%\Rust %RUST%\bin";%PATH%
 
-if [%Configuration%] == [Release] set CARGO_MODE=--release
+if [%Configuration%] == [Release] (
+    set CARGO_MODE=--release
+    set TARGET=release
+) else (
+    set TARGET=debug
+)
+
 
 set
 
@@ -37,6 +43,8 @@ link /?
 cl /?
 rustc --version
 cargo --version
+
+cd rust-certitude
 
 cargo build --verbose %CARGO_MODE%
 if %ERRORLEVEL% NEQ 0 exit 1
@@ -49,3 +57,16 @@ if %ERRORLEVEL% NEQ 0 exit 1
 
 cargo clean --verbose
 if %ERRORLEVEL% NEQ 0 exit 1
+
+cd ..
+cd c-certitude
+
+cargo build --verbose %CARGO_MODE%
+if %ERRORLEVEL% NEQ 0 exit 1
+
+cl target/%TARGET%/c_certitude.lib crypt32.lib ws2_32.lib shell32.lib userenv.lib test/test.c
+if %ERRORLEVEL% NEQ 0 exit 1
+
+test.exe
+if %ERRORLEVEL% NEQ 0 exit 1
+
