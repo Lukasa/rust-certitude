@@ -24,6 +24,7 @@ pub enum ValidationResult {
     ErrorDuringValidation,
     MissingFunctionality,
     UserAuthenticationRequired,
+    MalformedHostname,
 }
 
 
