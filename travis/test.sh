@@ -22,6 +22,6 @@ if [[ "${RELEASE}" = true ]]; then
 fi
 
 cd ../c-certitude
-cargo build --verbose "${CARGO_FLAGS}"
-clang -fsanitize=address -L "target/${TARGET}" -framework Security -framework CoreFoundation -lSystem -lc -lm -lc_certitude "${OPTIMIZATION}" test/test.c
+cargo build --verbose ${CARGO_FLAGS}
+clang -fsanitize=address -L target/${TARGET} -framework Security -framework CoreFoundation -lSystem -lc -lm -lc_certitude "${OPTIMIZATION}" test/test.c
 ./a.out
