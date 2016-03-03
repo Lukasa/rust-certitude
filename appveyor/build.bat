@@ -29,14 +29,19 @@ if %ERRORLEVEL% NEQ 0 exit 1
 
 set PATH="%TARGET_PROGRAM_FILES%\Rust %RUST%\bin";%PATH%
 
-if [%Configuration%] == [Release] set CARGO_MODE=--release
-
-set
+if [%Configuration%] == [Release] (
+    set CARGO_MODE=--release
+    set TARGET=release
+) else (
+    set TARGET=debug
+)
 
 link /?
 cl /?
 rustc --version
 cargo --version
+
+cd rust-certitude
 
 cargo build --verbose %CARGO_MODE%
 if %ERRORLEVEL% NEQ 0 exit 1
@@ -49,3 +54,25 @@ if %ERRORLEVEL% NEQ 0 exit 1
 
 cargo clean --verbose
 if %ERRORLEVEL% NEQ 0 exit 1
+
+cd ..
+cd c-certitude
+
+cargo build --verbose %CARGO_MODE%
+if %ERRORLEVEL% NEQ 0 exit 1
+
+dir target\%TARGET%\
+
+REM Move the .lib file to the name used in Rust nightly, if it exists.
+if exist target\%TARGET%\c_certitude.lib (
+    copy target\%TARGET%\c_certitude.lib target\%TARGET%\c_certitude.dll.lib
+)
+copy target\%TARGET%\c_certitude.dll .\c_certitude.dll
+if %ERRORLEVEL% NEQ 0 exit 1
+
+cl target\%TARGET%\c_certitude.dll.lib test/test.c
+if %ERRORLEVEL% NEQ 0 exit 1
+
+test.exe
+if %ERRORLEVEL% NEQ 0 exit 1
+

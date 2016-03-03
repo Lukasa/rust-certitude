@@ -10,3 +10,4 @@ use windows::validate_cert_chain as backend;
 pub fn validate_cert_chain(encoded_certs: &[&[u8]], hostname: &str) -> ValidationResult {
     backend(encoded_certs, hostname)
 }
+
