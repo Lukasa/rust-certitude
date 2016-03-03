@@ -36,9 +36,6 @@ if [%Configuration%] == [Release] (
     set TARGET=debug
 )
 
-
-set
-
 link /?
 cl /?
 rustc --version
@@ -64,11 +61,16 @@ cd c-certitude
 cargo build --verbose %CARGO_MODE%
 if %ERRORLEVEL% NEQ 0 exit 1
 
-REM We deliberately don't catch errors here: this problem got fixed on Rust nightly,
-REM so in Rust nightly the file libc_certitude.a won't exist. That's fine!
-mv target\%TARGET%\libc_certitude.a target\%TARGET%\c_certitude.lib
+dir target\%TARGET%\
 
-cl target\%TARGET%\c_certitude.lib crypt32.lib ws2_32.lib shell32.lib userenv.lib test/test.c
+REM Move the .lib file to the name used in Rust nightly, if it exists.
+if exist target\%TARGET%\c_certitude.lib (
+    copy target\%TARGET%\c_certitude.lib target\%TARGET%\c_certitude.dll.lib
+)
+copy target\%TARGET%\c_certitude.dll .\c_certitude.dll
+if %ERRORLEVEL% NEQ 0 exit 1
+
+cl target\%TARGET%\c_certitude.dll.lib test/test.c
 if %ERRORLEVEL% NEQ 0 exit 1
 
 test.exe
