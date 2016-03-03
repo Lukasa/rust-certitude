@@ -64,7 +64,11 @@ cd c-certitude
 cargo build --verbose %CARGO_MODE%
 if %ERRORLEVEL% NEQ 0 exit 1
 
-cl target/%TARGET%/c_certitude.lib crypt32.lib ws2_32.lib shell32.lib userenv.lib test/test.c
+REM We deliberately don't catch errors here: this problem got fixed on Rust nightly,
+REM so in Rust nightly the file libc_certitude.a won't exist. That's fine!
+mv target\%TARGET%\libc_certitude.a target\%TARGET%\c_certitude.lib
+
+cl target\%TARGET%\c_certitude.lib crypt32.lib ws2_32.lib shell32.lib userenv.lib test/test.c
 if %ERRORLEVEL% NEQ 0 exit 1
 
 test.exe
