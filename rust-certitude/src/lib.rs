@@ -27,6 +27,7 @@ pub enum ValidationResult {
     MalformedHostname,
 }
 
+pub use self::platform::validate_cert_chain;
 
 pub mod platform;
 #[cfg(windows)]
