@@ -9,7 +9,6 @@ use std::slice;
 use libc::c_char;
 
 pub use certitude::ValidationResult;
-use certitude;
 
 
 /// A C-ABI compatible version of the cert validation function. It does some work to transform the data,
