@@ -29,15 +29,15 @@ pub enum ValidationResult {
 
 pub use self::platform::validate_cert_chain;
 
-pub mod platform;
+mod platform;
 #[cfg(windows)]
-pub mod windows;
+mod windows;
 #[cfg(target_os = "macos")]
-pub mod osx;
+mod osx;
 
 #[cfg(test)]
 mod test {
-    use platform::validate_cert_chain;
+    use validate_cert_chain;
     use ValidationResult;
 
     pub fn certifi_chain() -> Vec<&'static[u8]> {
