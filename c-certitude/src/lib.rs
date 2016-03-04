@@ -15,6 +15,7 @@ pub use certitude::ValidationResult;
 /// and then just calls the cert validation function from certitude.
 ///
 /// Here are the rules for calling this from C.
+///
 /// - encoded_certs is an array of pointers to DER-encoded representations of the certificates in the
 ///   certificate chain. Neither the pointer array nor the DER-encoded representations of the certs
 ///   are null-terminated.
