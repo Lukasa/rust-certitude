@@ -3,6 +3,9 @@ name = "certitude"
 version = "0.1.0"
 authors = ["Cory Benfield <lukasaoz@gmail.com>"]
 
+[lib]
+doctest=false
+
 [dependencies]
 libc = "0.2"
 

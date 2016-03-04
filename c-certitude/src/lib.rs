@@ -8,28 +8,37 @@ use std::ffi::CStr;
 use std::slice;
 use libc::c_char;
 
-use certitude::ValidationResult;
-use certitude::platform;
+pub use certitude::ValidationResult;
 
 
-// A C-ABI compatible version of the cert validation function. It does some work to transform the data,
-// and then just calls the cert validation function from certitude.
-//
-// Here are the rules for calling this from C.
-// - encoded_certs is an array of pointers to DER-encoded representations of the certificates in the
-//   certificate chain. Neither the pointer array nor the DER-encoded representations of the certs
-//   are null-terminated.
-// - cert_sizes is an array of lengths for each DER-encoded cert. This array has the exact same length
-//   as the array in encoded_certs. These lengths must not include any null-terminators that may be at
-//   the end of the DER-encoded certs.
-// - cert_count is the number of elements in both the encoded_certs and cert_sizes array.
-// - hostname is the UTF-8 encoded hostname to validate the cert chain against. This string must be
-//   null-terminated.
-//
-// Rust takes ownership of none of these objects: where necessary it makes its own copies, but
-// generally speaking it expects all of the data passed to be it to remain valid for the duration
-// of the function call. The caller retains ownership, however, and is responsible for freeing all
-// the relevant data.
+/// A C-ABI compatible version of the cert validation function. It does some work to transform the data,
+/// and then just calls the cert validation function from certitude.
+///
+/// Here are the rules for calling this from C.
+///
+/// - encoded_certs is an array of pointers to DER-encoded representations of the certificates in the
+///   certificate chain. Neither the pointer array nor the DER-encoded representations of the certs
+///   are null-terminated.
+/// - cert_sizes is an array of lengths for each DER-encoded cert. This array has the exact same length
+///   as the array in encoded_certs. These lengths must not include any null-terminators that may be at
+///   the end of the DER-encoded certs.
+/// - cert_count is the number of elements in both the encoded_certs and cert_sizes array.
+/// - hostname is the UTF-8 encoded hostname to validate the cert chain against. This string must be
+///   null-terminated.
+///
+/// Rust takes ownership of none of these objects: where necessary it makes its own copies, but
+/// generally speaking it expects all of the data passed to be it to remain valid for the duration
+/// of the function call. The caller retains ownership, however, and is responsible for freeing all
+/// the relevant data.
+///
+/// The C header for this function is:
+///
+/// ```c
+/// extern uint32_t validate_cert_chain(uint8_t **encoded_certs,
+///                                     size_t *cert_sizes,
+///                                     size_t cert_count,
+///                                     const char *hostname);
+/// ```
 #[no_mangle]
 pub extern "C" fn validate_cert_chain(encoded_certs: *mut *const u8, cert_sizes: *mut usize, cert_count: usize, hostname: *const c_char) -> u32 {
     // First, turn the hostname into a CStr. CStr explicitly doesn't own the bytes, so we avoid
@@ -57,5 +66,5 @@ pub extern "C" fn validate_cert_chain(encoded_certs: *mut *const u8, cert_sizes:
                                     .collect::<Vec<&[u8]>>();
 
     // We can now validate the items. We've taken ownership of nothing here.
-    platform::validate_cert_chain(&cert_slice, encoded_hostname) as u32
+    certitude::validate_cert_chain(&cert_slice, encoded_hostname) as u32
 }

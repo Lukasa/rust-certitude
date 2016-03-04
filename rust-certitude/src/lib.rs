@@ -1,5 +1,17 @@
-// Functions for validating certificates on many platforms.
 #![deny(warnings)]
+//! Functions for validating certificates on many platforms.
+//!
+//! Certitude focuses on making it possible to validate a chain of X.509 certificates used
+//! for a TLS connection by using the appropriate platform-specific logic, rather than by
+//! relying on the TLS library that actually makes the connection. This approach is useful
+//! for libraries that want to use OpenSSL build TLS connections on Windows and OS X, but
+//! that want to exhibit "platform-native" behaviour on those systems.
+//!
+//! Currently Certitude *only* supports Windows and OS X: it explicitly does not support
+//! Linux or any other Unix, where it is expected that the verification logic provided by
+//! OpenSSL (or the appropriate TLS library) used on those systems will be used instead.
+//! As that library is likely the one responsible for actually handling the TLS logic, it
+//! is likely pretty easy to use the built-in validation logic.
 
 extern crate libc;
 
@@ -15,6 +27,19 @@ extern crate winapi;
 
 
 // TODO: Widen "NotTrusted".
+
+/// Possible results from attempting to validate a certificate chain.
+///
+/// When attempting to validate a certificate chain, in addition to the two "successful"
+/// results (`ValidationResult::Trusted` and `ValidationResult::NotTrusted`), there are
+/// numerous possible error conditions. This enum allows for expressing those error
+/// conditions.
+///
+/// Note that due to the vagaries of the system libraries, it is possible that a
+/// misleading error may be generated: for example, the hostname may be malformed
+/// but in a manner that does not immediate generate a `ValidationResult::MalformedHostname`
+/// result. That's unfortunate, but there is relatively little that can be done about that
+/// in the absence of clearer system APIs.
 #[derive(PartialEq, Debug)]
 pub enum ValidationResult {
     Trusted = 1,
@@ -27,16 +52,17 @@ pub enum ValidationResult {
     MalformedHostname,
 }
 
+pub use self::platform::validate_cert_chain;
 
-pub mod platform;
+mod platform;
 #[cfg(windows)]
-pub mod windows;
+mod windows;
 #[cfg(target_os = "macos")]
-pub mod osx;
+mod osx;
 
 #[cfg(test)]
 mod test {
-    use platform::validate_cert_chain;
+    use validate_cert_chain;
     use ValidationResult;
 
     pub fn certifi_chain() -> Vec<&'static[u8]> {
