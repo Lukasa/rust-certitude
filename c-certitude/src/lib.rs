@@ -30,6 +30,15 @@ use certitude;
 /// generally speaking it expects all of the data passed to be it to remain valid for the duration
 /// of the function call. The caller retains ownership, however, and is responsible for freeing all
 /// the relevant data.
+///
+/// The C header for this function is:
+///
+/// ```c
+/// extern uint32_t validate_cert_chain(uint8_t **encoded_certs,
+///                                     size_t *cert_sizes,
+///                                     size_t cert_count,
+///                                     const char *hostname);
+/// ```
 #[no_mangle]
 pub extern "C" fn validate_cert_chain(encoded_certs: *mut *const u8, cert_sizes: *mut usize, cert_count: usize, hostname: *const c_char) -> u32 {
     // First, turn the hostname into a CStr. CStr explicitly doesn't own the bytes, so we avoid
