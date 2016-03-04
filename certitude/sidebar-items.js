@@ -1,0 +1,1 @@
+initSidebarItems({"enum":[["ValidationResult","Possible results from attempting to validate a certificate chain."]],"fn":[["validate_cert_chain","Validate a chain of certificates."]]});
