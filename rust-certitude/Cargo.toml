@@ -1,6 +1,6 @@
 [package]
 name = "certitude"
-version = "0.1.0"
+version = "1.0.0"
 authors = ["Cory Benfield <lukasaoz@gmail.com>"]
 description = "Certificate validation logic for OS X and Windows."
 documentation = "https://lukasa.co.uk/rust-certitude/certitude"
