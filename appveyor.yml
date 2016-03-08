@@ -7,6 +7,7 @@ configuration:
   - Release
 platform:
   - x64
+  - Win32
 environment:
   matrix:
     - TOOLCHAIN_VERSION: 14.0
