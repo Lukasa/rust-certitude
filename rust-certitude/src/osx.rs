@@ -38,7 +38,7 @@ pub fn validate_cert_chain(encoded_certs: &[&[u8]], hostname: &str) -> Validatio
 // Convert a TrustResult to a ValidationResult.
 fn trust_result_to_validation_result(trust_result: TrustResult) -> ValidationResult {
     match trust_result {
-        TrustResult::Invalid | TrustResult::Unspecified => ValidationResult::Trusted,
+        TrustResult::Proceed | TrustResult::Unspecified => ValidationResult::Trusted,
         _ => ValidationResult::NotTrusted,
     }
 }
