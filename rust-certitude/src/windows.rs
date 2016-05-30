@@ -306,6 +306,6 @@ mod test {
         let new_chain = chain_builder.as_slice();
 
         let valid = validate_cert_chain(&new_chain, "certifi.io");
-        assert_eq!(valid, ValidationResult::NotTrusted);
+        assert_eq!(valid, ValidationResult::MalformedCertificateInChain);
     }
 }
