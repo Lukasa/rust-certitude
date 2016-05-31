@@ -38,7 +38,7 @@ pub fn validate_cert_chain(encoded_certs: &[&[u8]], hostname: &str) -> Validatio
 // Convert a TrustResult to a ValidationResult.
 fn trust_result_to_validation_result(trust_result: TrustResult) -> ValidationResult {
     match trust_result {
-        TrustResult::Invalid | TrustResult::Unspecified => ValidationResult::Trusted,
+        TrustResult::Proceed | TrustResult::Unspecified => ValidationResult::Trusted,
         _ => ValidationResult::NotTrusted,
     }
 }
@@ -112,6 +112,20 @@ mod test {
     fn test_fails_on_self_signed() {
         let chain = self_signed_chain();
         let valid = validate_cert_chain(&chain, "self-signed.badssl.com");
+        assert_eq!(valid, ValidationResult::NotTrusted);
+    }
+
+    #[test]
+    fn test_fails_on_invalid_asn1() {
+        // We need to mutate the first byte of the original cert.
+        let mut chain = certifi_chain();
+        let mut first_chain = chain[0].to_vec();
+        first_chain[0] = 0xff;
+        let mut chain_builder = vec![first_chain.as_slice()];
+        chain_builder.append(&mut chain[1..].to_vec());
+        let new_chain = chain_builder.as_slice();
+
+        let valid = validate_cert_chain(&new_chain, "certifi.io");
         assert_eq!(valid, ValidationResult::NotTrusted);
     }
 }

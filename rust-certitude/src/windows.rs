@@ -294,4 +294,18 @@ mod test {
         let valid = validate_cert_chain(&chain, "self-signed.badssl.com");
         assert_eq!(valid, ValidationResult::NotTrusted);
     }
+
+    #[test]
+    fn test_fails_on_invalid_asn1() {
+        // We need to mutate the first byte of the original cert.
+        let mut chain = certifi_chain();
+        let mut first_chain = chain[0].to_vec();
+        first_chain[0] = 0xff;
+        let mut chain_builder = vec![first_chain.as_slice()];
+        chain_builder.append(&mut chain[1..].to_vec());
+        let new_chain = chain_builder.as_slice();
+
+        let valid = validate_cert_chain(&new_chain, "certifi.io");
+        assert_eq!(valid, ValidationResult::MalformedCertificateInChain);
+    }
 }
