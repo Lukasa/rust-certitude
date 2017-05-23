@@ -18,10 +18,7 @@ pub fn validate_cert_chain(encoded_certs: &[&[u8]], hostname: &str) -> Validatio
         };
     }
 
-    let ssl_policy = match SecPolicy::for_ssl(ProtocolSide::Client, hostname) {
-        Ok(policy) => policy,
-        Err(_) => return ValidationResult::ErrorDuringValidation,
-    };
+    let ssl_policy = SecPolicy::create_ssl(ProtocolSide::Client, Some(hostname));
     let trust = match SecTrust::create_with_certificates(&certs[..], &[ssl_policy]) {
         Ok(trust) => trust,
         Err(status) => return os_status_to_validation_result(status.code())
@@ -98,7 +95,7 @@ mod test {
         let mut certs = vec![&leaf[1..50]];
         certs.extend(intermediates.iter());
         let valid = validate_cert_chain(&certs, "certifi.io");
-        assert_eq!(valid, ValidationResult::NotTrusted);
+        assert_eq!(valid, ValidationResult::MalformedCertificateInChain);
     }
 
     #[test]
@@ -126,6 +123,6 @@ mod test {
         let new_chain = chain_builder.as_slice();
 
         let valid = validate_cert_chain(&new_chain, "certifi.io");
-        assert_eq!(valid, ValidationResult::NotTrusted);
+        assert_eq!(valid, ValidationResult::MalformedCertificateInChain);
     }
 }

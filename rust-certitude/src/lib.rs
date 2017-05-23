@@ -112,12 +112,7 @@ mod test {
         let mut certs = vec![&leaf[1..50]];
         certs.extend(intermediates.iter());
         let valid = validate_cert_chain(&certs, "certifi.io");
-        if cfg!(target_os = "macos") {
-            assert_eq!(valid, ValidationResult::NotTrusted);
-        } else {
-            // Windows
-            assert_eq!(valid, ValidationResult::MalformedCertificateInChain);
-        }
+        assert_eq!(valid, ValidationResult::MalformedCertificateInChain);
     }
 
     #[test]
