@@ -76,14 +76,10 @@ if %ERRORLEVEL% NEQ 0 exit 1
 
 dir target\%TARGET%\
 
-REM Move the .lib file to the name used in Rust nightly, if it exists.
-if exist target\%TARGET%\c_certitude.lib (
-    copy target\%TARGET%\c_certitude.lib target\%TARGET%\c_certitude.dll.lib
-)
-copy target\%TARGET%\c_certitude.dll .\c_certitude.dll
+copy target\%TARGET%\deps\c_certitude*.dll .
 if %ERRORLEVEL% NEQ 0 exit 1
 
-cl target\%TARGET%\c_certitude.dll.lib test/test.c
+cl target\%TARGET%\deps\c_certitude*.dll.lib test/test.c
 if %ERRORLEVEL% NEQ 0 exit 1
 
 test.exe

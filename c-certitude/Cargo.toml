@@ -10,7 +10,7 @@ keywords = ["certificate", "validation", "tls", "ssl"]
 license = "MIT"
 
 [lib]
-crate-type = ["dylib"]
+crate-type = ["cdylib"]
 
 [dependencies]
 libc = "0.2"
